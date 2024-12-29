@@ -1,60 +1,56 @@
-version: '3.8'
+version: '3.7'
 
 services:
-
-  postgres:
-    image: postgres:15
-    container_name: postgres_db
-    environment:
-      POSTGRES_USER: user
-      POSTGRES_PASSWORD: password
-      POSTGRES_DB: logs_db
+  # SQLite Database
+  sqlite-db:
+    image: nouchka/sqlite3  # SQLite image to interact with the database
+    container_name: sqlite-db-container
     volumes:
-      - postgres_data:/var/lib/postgresql/data
-      - ./logs:/var/log/postgresql
+      - ./data/Chinook_Sqlite.sqlite:/data/Chinook_Sqlite.sqlite  # Mount your SQLite database file here
+    entrypoint: sqlite3 /data/Chinook_Sqlite.sqlite  # Directly run sqlite3 to access the database
+    stdin_open: true  # Allow interactive mode
+    tty: true  # Allocate pseudo-TTY to keep interactive
+    networks:
+      - elk-network
+
+  # NiFi for Data Processing
+  nifi:
+    image: apache/nifi:1.26.0  # Specify the version to match docker run example
     ports:
-      - "5432:5432"
-    logging:
-      options:
-        max-size: "10m"
-        max-file: "3"
-
-  logstash:
-    image: docker.elastic.co/logstash/logstash:8.10.2
-    container_name: logstash
+      - "8443:8443"  # Expose HTTPS port
+    networks:
+      - elk-network
     volumes:
-      - ./logstash/pipeline:/usr/share/logstash/pipeline
-      - ./logstash/config:/usr/share/logstash/config
+      - ./nifi-data:/opt/nifi/nifi-current/data  # Persist NiFi data
+      - ./shared:/shared  # Mount shared directory as in the docker run example
     environment:
-      LS_JAVA_OPTS: "-Xmx256m -Xms256m"
+      NIFI_WEB_HTTPS_PORT: 8443  # Use HTTPS
+      SINGLE_USER_CREDENTIALS_USERNAME: eceuser  # Set username for single user access
+      SINGLE_USER_CREDENTIALS_PASSWORD: ecebigdataproject  # Set password for single user access
     depends_on:
-      - postgres
-    ports:
-      - "5044:5044"
-      - "9600:9600"
+      - sqlite-db
+    restart: always  # Restart NiFi container on failure
 
+  # Elasticsearch
   elasticsearch:
     image: docker.elastic.co/elasticsearch/elasticsearch:8.10.2
-    container_name: elasticsearch
     environment:
       - discovery.type=single-node
-      - xpack.security.enabled=false
-    volumes:
-      - elasticsearch_data:/usr/share/elasticsearch/data
+    networks:
+      - elk-network
     ports:
       - "9200:9200"
-      - "9300:9300"
 
+  # Kibana for Visualization
   kibana:
     image: docker.elastic.co/kibana/kibana:8.10.2
-    container_name: kibana
     environment:
-      ELASTICSEARCH_HOSTS: "http://elasticsearch:9200"
+      - ELASTICSEARCH_HOSTS=http://elasticsearch:9200
+    networks:
+      - elk-network
     ports:
       - "5601:5601"
-    depends_on:
-      - elasticsearch
 
-volumes:
-  postgres_data:
-  elasticsearch_data:
+networks:
+  elk-network:
+    driver: bridge

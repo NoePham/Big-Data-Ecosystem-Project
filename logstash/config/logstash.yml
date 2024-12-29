@@ -1,5 +1,0 @@
-# logstash.yml
-path.data: /usr/share/logstash/data
-pipeline.workers: 2
-config.reload.automatic: true
-http.host: "0.0.0.0"
