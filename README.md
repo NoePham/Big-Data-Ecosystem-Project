@@ -151,6 +151,13 @@ output {
 }
 ```
 
+### Queries To test on Kibana
+
+You can copy and paste the file `queries.json` into the console dev tools to test if the shards are present inside elastic
+
+Kibana login in the .env by default : `elastic`
+Kibana password in the .env by default : `elastic123`
+
 ## Troubleshooting
 
 - If the containers are not starting properly, check the logs for errors:
