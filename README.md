@@ -158,6 +158,27 @@ You can copy and paste the file `queries.json` into the console dev tools to tes
 Kibana login in the .env by default : `elastic`
 Kibana password in the .env by default : `elastic123`
 
+```json
+GET /artist/_search
+{
+  "aggs": {
+    "artists": {
+      "terms": {
+        "field": "artist_name.keyword",
+        "size": 10
+      },
+      "aggs": {
+        "albums_count": {
+          "value_count": {
+            "field": "album_title.keyword"
+          }
+        }
+      }
+    }
+  }
+}
+```
+
 ## Troubleshooting
 
 - If the containers are not starting properly, check the logs for errors:
