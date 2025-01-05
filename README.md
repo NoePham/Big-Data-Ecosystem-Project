@@ -1,6 +1,3 @@
-Here's a basic `README.md` file for the project based on the files provided:
-
----
 
 # Big Data Ecosystem Project
 
