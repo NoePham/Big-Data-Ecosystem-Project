@@ -165,14 +165,3 @@ docker-compose logs <container_name>
 - Ensure that the `.env` file is correctly configured with the necessary environment variables.
 - Verify that the MySQL database is properly initialized with the `Chinook` schema using the `init.sql` script.
 
-## Contributing
-
-Feel free to submit issues or pull requests for improvements. If you'd like to contribute, please fork the repository and create a pull request with a description of the changes.
-
-## License
-
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
-
----
-
-This `README.md` provides an overview of the project setup, environment, services, and the steps to get started. If you need any further customization or additions to this file, feel free to let me know!
